@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Chronic Kidney Disease ML</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="/static/css/static.css" rel="stylesheet"> <!-- Link to custom CSS -->
+
+    <!-- External Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+    <!-- JQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <!-- Custom JS -->
+    <script type="text/javascript" src="{{ url_for('static', filename='js/logic.js') }}"></script>
+
+</head>
+
+<body>
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">
+                <img src="/static/images/Logo.png" alt="Logo" style="height: 40px;">
+            </a>
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/dashboard1">Census Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/dashboard2">CKD Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/index">CKD Predictor</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/about_us">About Us</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/works_cited">Works Cited</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Content Section -->
+    <div class="container mt-4">
+        <div class="text-center mb-4">
+            <h1>Chronic Kidney Disease Predictions</h1>
+        </div>
+        <hr style="color:lightgray; border-width: 3px;">
+
+        <div class="card mb-4">
+            <div class="card-header text-white">
+                <h4 class="mb-0">Please complete the form below and then click 'Make a Prediction!' to see your chances of being diagnosed with CKD</h4>
+            </div>
+            <div class="card-body">
+                <form id="ckd-form">
+                    <div class="row">
+                        <!-- Left Column: Input Fields -->
+                        <div class="col-md-6">
+                            <!-- Demographic Details -->
+                            <div class="mb-3">
+                                <label for="age" class="form-label">Age (20-90 years)</label>
+                                <input type="number" class="form-control" id="age" name="age" min="20" max="90"
+                                    value="21" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="gender" class="form-label">Gender</label>
+                                <select id="gender" name="gender" class="form-select" required>
+                                    <option value="0" selected="selected">Male</option>
+                                    <option value="1">Female</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="ethnicity" class="form-label">Ethnicity</label>
+                                <select id="ethnicity" name="ethnicity" class="form-select" required>
+                                    <option value="0" selected="selected">Caucasian</option>
+                                    <option value="1">African American</option>
+                                    <option value="2">Asian</option>
+                                    <option value="3">Other</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="socioeconomicStatus" class="form-label">Socioeconomic Status</label>
+                                <select id="socioeconomicStatus" name="socioeconomicStatus" class="form-select"
+                                    required>
+                                    <option value="0" selected="selected">Low</option>
+                                    <option value="1">Middle</option>
+                                    <option value="2">High</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="educationLevel" class="form-label">Education Level</label>
+                                <select id="educationLevel" name="educationLevel" class="form-select" required>
+                                    <option value="0">None</option>
+                                    <option value="1" selected="selected">High School</option>
+                                    <option value="2">Bachelor's</option>
+                                    <option value="3">Higher</option>
+                                </select>
+                            </div>
+
+                            <!-- Lifestyle Factors -->
+                            <div class="mb-3">
+                                <label for="bmi" class="form-label">BMI (15-40)</label>
+                                <input type="number" class="form-control" id="bmi" name="bmi" min="15" max="40"
+                                    step="0.1" value="17.8" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="alcoholConsumption" class="form-label">Alcohol Consumption (units/week, 0-20)</label>
+                                <input type="number" class="form-control" id="alcoholConsumption" name="alcoholConsumption"
+                                    min="0" max="20" value="3" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="physicalActivity" class="form-label">Physical Activity (hours/week, 0-10)</label>
+                                <input type="number" class="form-control" id="physicalActivity" name="physicalActivity"
+                                    min="0" max="10" value="4" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="dietQuality" class="form-label">Diet Quality (0-10)</label>
+                                <input type="number" class="form-control" id="dietQuality" name="dietQuality"
+                                    min="0" max="10" value="6" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="sleepQuality" class="form-label">Sleep Quality (4-10)</label>
+                                <input type="number" class="form-control" id="sleepQuality" name="sleepQuality"
+                                    min="4" max="10" value="6" required>
+                            </div>
+
+                            <!-- Clinical Measurements -->
+                            <div class="mb-3">
+                                <label for="systolicBP" class="form-label">Systolic BP (90-180 mmHg)</label>
+                                <input type="number" class="form-control" id="systolicBP" name="systolicBP"
+                                    min="90" max="180" value="127" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="diastolicBP" class="form-label">Diastolic BP (60-120 mmHg)</label>
+                                <input type="number" class="form-control" id="diastolicBP" name="diastolicBP"
+                                    min="60" max="120" value="81" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="fastingBloodSugar" class="form-label">Fasting Blood Sugar (70-200 mg/dL)</label>
+                                <input type="number" class="form-control" id="fastingBloodSugar" name="fastingBloodSugar"
+                                    min="70" max="200" value="88" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="hba1c" class="form-label">HbA1c (4.0-10.0 %)</label>
+                                <input type="number" step="0.1" class="form-control" id="hba1c" name="hba1c"
+                                    min="4.0" max="10.0" value="5.2" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="serumCreatinine" class="form-label">Serum Creatinine (0.5-5.0 mg/dL)</label>
+                                <input type="number" step="0.1" class="form-control" id="serumCreatinine"
+                                    name="serumCreatinine" min="0.5" max="5.0" value="0.97" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="bunLevels" class="form-label">BUN Levels (5-50 mg/dL)</label>
+                                <input type="number" class="form-control" id="bunLevels" name="bunLevels" min="5"
+                                    max="50" value="14" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="gfr" class="form-label">GFR (15-120 mL/min/1.73 m²)</label>
+                                <input type="number" class="form-control" id="gfr" name="gfr" min="15" max="120"
+                                    value="114" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="proteinInUrine" class="form-label">Protein in Urine (0-5 g/day)</label>
+                                <input type="number" step="0.1" class="form-control" id="proteinInUrine"
+                                    name="proteinInUrine" min="0" max="5" value=".01" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="acr" class="form-label">Albumin-to-Creatinine Ratio (0-300 mg/g)</label>
+                                <input type="number" class="form-control" id="acr" name="acr" min="0" max="300"
+                                    value="20" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="serumElectrolytesSodium" class="form-label">Serum Sodium (135-145 mEq/L)</label>
+                                <input type="number" step="0.1" class="form-control" id="serumElectrolytesSodium"
+                                    name="serumElectrolytesSodium" min="135" max="145" value="138" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="serumElectrolytesPotassium" class="form-label">Serum Potassium (3.5-5.5 mEq/L)</label>
+                                <input type="number" step="0.1" class="form-control" id="serumElectrolytesPotassium"
+                                    name="serumElectrolytesPotassium" min="3.5" max="5.5" value="4.1" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="serumElectrolytesCalcium" class="form-label">Serum Calcium (8.5-10.5 mg/dL)</label>
+                                <input type="number" step="0.1" class="form-control" id="serumElectrolytesCalcium"
+                                    name="serumElectrolytesCalcium" min="8.5" max="10.5" value="10" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="serumElectrolytesPhosphorus" class="form-label">Serum Phosphorus (2.5-4.5 mg/dL)</label>
+                                <input type="number" step="0.1" class="form-control" id="serumElectrolytesPhosphorus"
+                                    name="serumElectrolytesPhosphorus" min="2.5" max="4.5" value="3.9" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="hemoglobinLevels" class="form-label">Hemoglobin Levels (10-18 g/dL)</label>
+                                <input type="number" step="0.1" class="form-control" id="hemoglobinLevels"
+                                    name="hemoglobinLevels" min="10" max="18" value="16.5" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="cholesterolTotal" class="form-label">Total Cholesterol (150-300 mg/dL)</label>
+                                <input type="number" class="form-control" id="cholesterolTotal" name="cholesterolTotal"
+                                    min="150" max="300" value="149" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="cholesterolLDL" class="form-label">LDL Cholesterol (50-200 mg/dL)</label>
+                                <input type="number" class="form-control" id="cholesterolLDL" name="cholesterolLDL"
+                                    min="50" max="200" value="57" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="cholesterolHDL" class="form-label">HDL Cholesterol (20-100 mg/dL)</label>
+                                <input type="number" class="form-control" id="cholesterolHDL" name="cholesterolHDL"
+                                    min="20" max="100" value="72" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="cholesterolTriglycerides" class="form-label">Triglycerides (50-400 mg/dL)</label>
+                                <input type="number" class="form-control" id="cholesterolTriglycerides"
+                                    name="cholesterolTriglycerides" min="50" max="400" value="71" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="nsaidsUse" class="form-label">NSAIDs Use (1-10/week)</label>
+                                <input type="number" class="form-control" id="nsaidsUse"
+                                    name="nsaidsUse" min="0" max="10" value="0" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="fatigueLevels" class="form-label">Fatigue Levels (1-10)</label>
+                                <input type="number" class="form-control" id="fatigueLevels" name="fatigueLevels"
+                                    min="1" max="10" value="2" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="nauseaVomiting" class="form-label">Nausea/Vomiting (1-10)</label>
+                                <input type="number" class="form-control" id="nauseaVomiting" name="nauseaVomiting"
+                                    min="1" max="10" value="0" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="muscleCramps" class="form-label">Muscle Cramps (1-10)</label>
+                                <input type="number" class="form-control" id="muscleCramps" name="muscleCramps"
+                                    min="1" max="10" value="0" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="itching" class="form-label">Itching (1-10)</label>
+                                <input type="number" class="form-control" id="itching" name="itching"
+                                    min="1" max="10" value="0" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="qualityOfLifeScore" class="form-label">Quality of Life Score (1-10)</label>
+                                <input type="number" class="form-control" id="qualityOfLifeScore" name="qualityOfLifeScore"
+                                    min="1" max="10" value="8" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="medicalCheckupsFrequency" class="form-label">Medical Checkups Frequency (1-12 per year)</label>
+                                <input type="number" class="form-control" id="medicalCheckupsFrequency" name="medicalCheckupsFrequency"
+                                    min="1" max="12" value="1" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="medicationAdherence" class="form-label">Medication Adherence (1-10)</label>
+                                <input type="number" class="form-control" id="medicationAdherence" name="medicationAdherence"
+                                    min="1" max="10" value="5" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="healthLiteracy" class="form-label">Health Literacy (1-10)</label>
+                                <input type="number" class="form-control" id="healthLiteracy" name="healthLiteracy"
+                                    min="1" max="10" value="5" required>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Checkboxes and Radio Buttons -->
+                        <div class="col-md-6">
+                            <!-- Medical History -->
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="familyHistoryKidneyDisease"
+                                        name="familyHistoryKidneyDisease" value="1">
+                                    <label class="form-check-label" for="familyHistoryKidneyDisease">
+                                        Family History of Kidney Disease
+                                    </label>
+                                </div>
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="checkbox" id="familyHistoryHypertension"
+                                        name="familyHistoryHypertension" value="1">
+                                    <label class="form-check-label" for="familyHistoryHypertension">
+                                        Family History of Hypertension
+                                    </label>
+                                </div>
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="checkbox" id="familyHistoryDiabetes"
+                                        name="familyHistoryDiabetes" value="1">
+                                    <label class="form-check-label" for="familyHistoryDiabetes">
+                                        Family History of Diabetes
+                                    </label>
+                                </div>
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="checkbox" id="previousAcuteKidneyInjury"
+                                        name="previousAcuteKidneyInjury" value="1">
+                                    <label class="form-check-label" for="previousAcuteKidneyInjury">
+                                        Previous Acute Kidney Injury
+                                    </label>
+                                </div>
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="checkbox" id="urinaryTractInfections"
+                                        name="urinaryTractInfections" value="1">
+                                    <label class="form-check-label" for="urinaryTractInfections">
+                                        Urinary Tract Infections
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Medications -->
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="aceInhibitors"
+                                        name="aceInhibitors" value="1">
+                                    <label class="form-check-label" for="aceInhibitors">
+                                        ACE Inhibitors
+                                    </label>
+                                </div>
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="checkbox" id="diuretics" name="diuretics"
+                                        value="1">
+                                    <label class="form-check-label" for="diuretics">
+                                        Diuretics
+                                    </label>
+                                </div>
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="checkbox" id="statins" name="statins"
+                                        value="1">
+                                    <label class="form-check-label" for="statins">
+                                        Statins
+                                    </label>
+                                </div>
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="checkbox" id="antidiabeticMedications"
+                                        name="antidiabeticMedications" value="1">
+                                    <label class="form-check-label" for="antidiabeticMedications">
+                                        Antidiabetic Medications
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Symptoms and Quality of Life -->
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="edema" name="edema"
+                                        value="1">
+                                    <label class="form-check-label" for="edema">
+                                        Edema
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Environmental and Occupational Exposures -->
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="heavyMetalsExposure"
+                                        name="heavyMetalsExposure" value="1">
+                                    <label class="form-check-label" for="heavyMetalsExposure">
+                                        Heavy Metals Exposure
+                                    </label>
+                                </div>
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="checkbox"
+                                        id="occupationalExposureChemicals" name="occupationalExposureChemicals"
+                                        value="1">
+                                    <label class="form-check-label" for="occupationalExposureChemicals">
+                                        Occupational Exposure to Chemicals
+                                    </label>
+                                </div>
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="checkbox"
+                                        id="smoking" name="smoking"
+                                        value="1" checked>
+                                    <label class="form-check-label" for="smoking">
+                                        Smoking
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Water Quality -->
+                            <div class="mb-3">
+                                <label class="form-label">Water Quality</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="waterQuality"
+                                        id="waterQualityGood" value="0" checked>
+                                    <label class="form-check-label" for="waterQualityGood">
+                                        Good
+                                    </label>
+                                </div>
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="radio" name="waterQuality"
+                                        id="waterQualityPoor" value="1">
+                                    <label class="form-check-label" for="waterQualityPoor">
+                                        Poor
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Additional Input Fields and Checkboxes -->
+                    <div class="row">
+                        <!-- Additional Inputs (e.g., Medications, Symptoms, etc.) can be added here if necessary -->
+                        <!-- For simplicity, assuming all inputs are covered in the left and checkboxes in the right columns -->
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="d-grid gap-2 col-6 mx-auto mt-4">
+                        <button type="button" class="btn btn-primary btn-lg" id="filter">Make Prediction!</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <hr style="color:lightgray; border-width: 3px;">
+        <div class="text-center">
+            <h1 id="output"></h1>
+        </div>
+    </div>
+
+    <!-- Optional: You can add a footer here -->
+
+</body>
+
+</html>
